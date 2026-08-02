@@ -10,10 +10,12 @@ A Telegram bot where players roll a random size in group chats. Each roll change
 - `/top` — show the top 10 players:
   - in a group → leaderboard for that group
   - in a private chat → **global** leaderboard (sizes summed across all groups)
+- `/buy` — reset your cooldown for Telegram Stars (private chat only), so you can `/dick` again immediately
 - `/help` — command reference
 - `/start` — bot info (private chat only)
 - Auto-registered command menu (`set_my_commands`)
-- Command throttling in groups (silent rate limit, default 10s)
+- Per-user, per-command throttling in groups (silent rate limit, default 1s)
+- Monetization via **Telegram Stars** (`XTR` invoices, `pre_checkout_query` + `successful_payment` flow, payments stored for refunds)
 - Two storage backends: SQLite or in-memory
 - File logging with rotation
 
@@ -58,7 +60,8 @@ A Telegram bot where players roll a random size in group chats. Each roll change
 | `INITIAL_SIZE` | `0` | Starting size for new players |
 | `DB_PATH` | `dick_bot.db` | SQLite database file path |
 | `SAVE_TO_DB` | `true` | `true` = persist to SQLite, `false` = keep data in memory only (resets on restart) |
-| `GROUP_THROTTLE_SECONDS` | `10` | Seconds of silent command throttling in groups (`0` = off) |
+| `GROUP_THROTTLE_SECONDS` | `1` | Seconds of silent throttling per user **and** per command in groups (`0` = off) |
+| `ATTEMPT_COST` | `25` | Price in ⭐ (Telegram Stars) to reset the `/dick` cooldown via `/buy` |
 | `LOG_PATH` | `dick_bot.log` | Log file path |
 
 ## Running
@@ -111,6 +114,7 @@ To make plain commands like `/dick` work in groups, either:
 2. A random value is rolled between `MIN_SIZE` and `MAX_SIZE` (e.g. `-5` to `10`).
 3. The value is added to the player's stored size (e.g. `100 + (-4) = 96 cm`).
 4. The bot replies with the change, the new size, the player's rank in the group, and the next available attempt time (Kyiv time).
+5. If the cooldown is still active, the player can reset it by paying `ATTEMPT_COST` ⭐ via `/buy` in the bot's private chat and immediately `/dick` again.
 
 ## Project structure
 
@@ -125,6 +129,7 @@ handlers/
   start.py                    # /start
   dick.py                     # /dick
   top.py                      # /top (group + global)
+  payments.py                 # /buy, Telegram Stars invoices + successful payment
   help.py                     # /help
 services/
   dick_service.py             # game logic: roll, cooldown, rank, message
