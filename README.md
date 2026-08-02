@@ -68,6 +68,36 @@ source venv/bin/activate
 python main.py
 ```
 
+## Docker (Alpine)
+
+The image is based on `python:3.12-alpine`. The database and logs are stored on a named volume, so data survives container restarts.
+
+```bash
+cp .env.example .env
+# set BOT_TOKEN in .env
+
+docker compose up -d --build
+```
+
+Stop the bot:
+
+```bash
+docker compose down
+```
+
+Run manually without compose:
+
+```bash
+docker build -t spiridick-bot .
+docker run -d --name spiridick-bot \
+  --env-file .env \
+  -e DB_PATH=/app/data/dick_bot.db \
+  -e LOG_PATH=/app/data/dick_bot.log \
+  -v spiridick-data:/app/data \
+  --restart unless-stopped \
+  spiridick-bot
+```
+
 ## Bot setup in Telegram
 
 To make plain commands like `/dick` work in groups, either:
@@ -89,6 +119,8 @@ main.py                       # entry point: dispatcher, command menu, polling
 config.py                     # .env loading + validation
 db.py                         # SQLite layer (aiosqlite)
 storage.py                    # storage switch: SQLite or in-memory
+Dockerfile                    # Alpine-based Docker image
+docker-compose.yml            # compose service with persistent volume
 handlers/
   start.py                    # /start
   dick.py                     # /dick

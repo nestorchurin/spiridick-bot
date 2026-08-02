@@ -1,0 +1,15 @@
+services:
+  bot:
+    build: .
+    container_name: spiridick-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_PATH: /app/data/dick_bot.db
+      LOG_PATH: /app/data/dick_bot.log
+    volumes:
+      - bot-data:/app/data
+
+volumes:
+  bot-data:
