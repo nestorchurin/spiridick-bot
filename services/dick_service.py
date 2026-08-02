@@ -23,7 +23,9 @@ def build_cooldown_message(first_name: str, size: int, rank: int, last_used: int
     )
 
 
-def build_result_text(first_name: str, roll: int, new_size: int, rank: int, now: int) -> str:
+def build_result_text(
+    first_name: str, roll: int, new_size: int, rank: int, now: int
+) -> str:
     if roll < 0:
         change_line = f"{first_name}, твій пісюн зменшився на {abs(roll)} см 📉"
     elif roll > 0:

@@ -16,4 +16,7 @@ async def cmd_dick(message: Message):
 
 @router.message(Command("dick"), F.chat.type == "private")
 async def cmd_dick_private(message: Message):
-    await message.answer("Команда /dick доступна лише в групових чатах.")
+    await message.answer(
+        "Команда /dick доступна лише в групових чатах.\n"
+        "Хочеш скинути кулдаун і зіграти знову? Напиши /buy."
+    )

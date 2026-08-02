@@ -49,6 +49,12 @@ class MemoryStore:
         )
         return entries[:limit]
 
+    async def reset_cooldown(self, user_id: int):
+        for key in list(self.rows.keys()):
+            if key[0] == user_id:
+                size, _, name = self.rows[key]
+                self.rows[key] = (size, 0, name)
+
 
 _memory_store: MemoryStore | None = None
 

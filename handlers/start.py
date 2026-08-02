@@ -13,6 +13,7 @@ async def cmd_start_private(message: Message):
         f"*Dick Bot | {config.VERSION}*\n"
         f"Команда /dick працює лише в групових чатах. Раз в {config.COOLDOWN_TEXT} гравець може прописати цю команду, щоб отримати випадковий розмір.\n"
         f"Наразі розмір від {config.MIN_SIZE} до {config.MAX_SIZE} см.\n"
+        f"Не хочеш чекати? Скинь кулдаун за {config.ATTEMPT_COST} ⭐ через /buy.\n"
         f"Якщо у тебе є питання — пиши /help."
     )
     await message.answer(text, parse_mode="Markdown")

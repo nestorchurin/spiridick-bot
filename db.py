@@ -23,6 +23,18 @@ async def init_db():
             await db.execute(
                 "ALTER TABLE users ADD COLUMN first_name TEXT NOT NULL DEFAULT ''"
             )
+        await db.execute("DROP TABLE IF EXISTS attempts")
+        await db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS payments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                charge_id TEXT NOT NULL,
+                stars INTEGER NOT NULL,
+                created_at INTEGER NOT NULL
+            )
+            """
+        )
         await db.commit()
 
 
@@ -86,3 +98,18 @@ async def get_top_global(limit: int = 10):
             (limit,),
         ) as cursor:
             return await cursor.fetchall()
+
+
+async def reset_cooldown(user_id: int):
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        await db.execute("UPDATE users SET last_used = 0 WHERE user_id = ?", (user_id,))
+        await db.commit()
+
+
+async def add_payment(user_id: int, charge_id: str, stars: int, created_at: int):
+    async with aiosqlite.connect(config.DB_PATH) as db:
+        await db.execute(
+            "INSERT INTO payments (user_id, charge_id, stars, created_at) VALUES (?, ?, ?, ?)",
+            (user_id, charge_id, stars, created_at),
+        )
+        await db.commit()

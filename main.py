@@ -7,7 +7,7 @@ from aiogram.types import BotCommand
 
 import config
 import storage
-from handlers import dick_router, help_router, start_router, top_router
+from handlers import dick_router, help_router, payments_router, start_router, top_router
 from utils.throttle import GroupCommandThrottle
 
 dp = Dispatcher()
@@ -16,6 +16,7 @@ COMMANDS = [
     BotCommand(command="start", description="Інформація про бота"),
     BotCommand(command="dick", description="Випадковий розмір (тільки в групах)"),
     BotCommand(command="top", description="Топ 10 гравців"),
+    BotCommand(command="buy", description="Скинути кулдаун за зірки (приватний чат)"),
     BotCommand(command="help", description="Довідка"),
 ]
 
@@ -38,6 +39,7 @@ async def main():
     dp.include_router(start_router)
     dp.include_router(dick_router)
     dp.include_router(top_router)
+    dp.include_router(payments_router)
     dp.include_router(help_router)
     dp.message.outer_middleware(GroupCommandThrottle(config.GROUP_THROTTLE_SECONDS))
     await storage.init()

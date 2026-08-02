@@ -16,6 +16,7 @@ INITIAL_SIZE = int(os.getenv("INITIAL_SIZE", "0"))
 DB_PATH = os.getenv("DB_PATH", "dick_bot.db")
 LOG_PATH = os.getenv("LOG_PATH", "dick_bot.log")
 GROUP_THROTTLE_SECONDS = int(os.getenv("GROUP_THROTTLE_SECONDS", "10"))
+ATTEMPT_COST = int(os.getenv("ATTEMPT_COST", "25"))
 SAVE_TO_DB = os.getenv("SAVE_TO_DB", "true").strip().lower() in ("1", "true", "yes", "on")
 KYIV_TZ = ZoneInfo("Europe/Kyiv")
 
