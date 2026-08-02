@@ -1,44 +1,48 @@
 import asyncio
 import logging
-import os
-from aiogram import Bot, Dispatcher, types, F
-from aiogram.filters import Command
-from aiogram.types import Message
-from dotenv import load_dotenv
+from logging.handlers import RotatingFileHandler
 
-load_dotenv()
+from aiogram import Bot, Dispatcher
+from aiogram.types import BotCommand
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-VERSION = os.getenv("BOT_VERSION", "1.0.0")
-COOLDOWN = os.getenv("COOLDOWN", "10 хвилин")
-MIN_SIZE = int(os.getenv("MIN_SIZE", "5"))
-MAX_SIZE = int(os.getenv("MAX_SIZE", "30"))
-
-if not BOT_TOKEN:
-    raise ValueError("BOT_TOKEN not found in environment variables")
+import config
+import storage
+from handlers import dick_router, help_router, start_router, top_router
+from utils.throttle import GroupCommandThrottle
 
 dp = Dispatcher()
 
-
-@dp.message(Command("start"), F.chat.type == "private")
-async def cmd_start_private(message: Message):
-    text = (
-        f"*Dick Bot | {VERSION}*\n"
-        f"Команда /dick працює лише в групових чатах. Раз в {COOLDOWN} гравець може прописати цю команду, щоб отримати випадковий розмір.\n"
-        f"Наразі розмір від {MIN_SIZE} до {MAX_SIZE} см.\n"
-        f"Якщо у тебе є питання — пиши /help."
-    )
-    await message.answer(text, parse_mode="Markdown")
+COMMANDS = [
+    BotCommand(command="start", description="Інформація про бота"),
+    BotCommand(command="dick", description="Випадковий розмір (тільки в групах)"),
+    BotCommand(command="top", description="Топ 10 гравців"),
+    BotCommand(command="help", description="Довідка"),
+]
 
 
-@dp.message(Command("start"), F.chat.type.in_({"group", "supergroup"}))
-async def cmd_start_group(message: Message):
-    await message.answer("Ця команда доступна лише в @spiridick_bot")
+async def set_commands(bot: Bot):
+    await bot.set_my_commands(COMMANDS)
 
 
 async def main():
-    logging.basicConfig(level=logging.INFO)
-    bot = Bot(token=BOT_TOKEN)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+            RotatingFileHandler(
+                config.LOG_PATH, maxBytes=1_000_000, backupCount=3, encoding="utf-8"
+            ),
+        ],
+    )
+    dp.include_router(start_router)
+    dp.include_router(dick_router)
+    dp.include_router(top_router)
+    dp.include_router(help_router)
+    dp.message.outer_middleware(GroupCommandThrottle(config.GROUP_THROTTLE_SECONDS))
+    await storage.init()
+    bot = Bot(token=config.BOT_TOKEN)
+    await set_commands(bot)
     await dp.start_polling(bot)
 
 
